@@ -127,18 +127,18 @@ def get_datasets(
         raise ValueError(f"Data config {data_config} not recognized.")
     
     if data_format == None:
-        raw_datasets = mix_datasets(dataset_mixer, splits=splits, shuffle=shuffle)
+        raw_datasets = mix_datasets(dataset_mixer, splits=splits, cache_dir=data_config.cache_dir)
     else:
         raw_datasets = load_local_datasets(dataset_mixer, data_format, shuffle=shuffle)
     return raw_datasets
 
-def load_local_datasets(dataset_mixer: dict, data_format: str, shuffle=True) -> DatasetDict:
+def load_local_datasets(dataset_mixer: dict, data_format: str, cache_dir: str) -> DatasetDict:
     """
     Loads json files
     """
     raw_datasets = {}
-    raw_datasets["train"] = load_dataset(data_format, data_files=dataset_mixer["train"])['train']
-    raw_datasets["test"] = load_dataset(data_format, data_files=dataset_mixer["test"])['train']
+    raw_datasets["train"] = load_dataset(data_format, data_files=dataset_mixer["train"], cache_dir=cache_dir)['train']
+    raw_datasets["test"] = load_dataset(data_format, data_files=dataset_mixer["test"], cache_dir=cache_dir)['train']
 
     return raw_datasets
 
