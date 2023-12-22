@@ -127,9 +127,9 @@ def get_datasets(
         raise ValueError(f"Data config {data_config} not recognized.")
     
     if data_format == None:
-        raw_datasets = mix_datasets(dataset_mixer, splits=splits, cache_dir=data_config.cache_dir)
+        raw_datasets = mix_datasets(dataset_mixer, splits=splits, shuffle=shuffle)
     else:
-        raw_datasets = load_local_datasets(dataset_mixer, data_format, shuffle=shuffle)
+        raw_datasets = load_local_datasets(dataset_mixer, data_format, cache_dir=data_config.cache_dir)
     return raw_datasets
 
 def load_local_datasets(dataset_mixer: dict, data_format: str, cache_dir: str) -> DatasetDict:
@@ -137,8 +137,15 @@ def load_local_datasets(dataset_mixer: dict, data_format: str, cache_dir: str) -
     Loads json files
     """
     raw_datasets = {}
-    raw_datasets["train"] = load_dataset(data_format, data_files=dataset_mixer["train"], cache_dir=cache_dir)['train']
-    raw_datasets["test"] = load_dataset(data_format, data_files=dataset_mixer["test"], cache_dir=cache_dir)['train']
+    if "train" in dataset_mixer:
+        raw_datasets["train"] = load_dataset(data_format, data_files=dataset_mixer["train"], cache_dir=cache_dir)['train']
+    else:
+        raw_datasets["train"] = None
+
+    if "test" in dataset_mixer:
+        raw_datasets["test"] = load_dataset(data_format, data_files=dataset_mixer["test"], cache_dir=cache_dir)['train']
+    else:
+        raw_datasets["test"] = None
 
     return raw_datasets
 

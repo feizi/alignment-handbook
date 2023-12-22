@@ -2,6 +2,7 @@ import copy
 import random
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Sequence
+import sys
 
 import torch
 import torch.distributed
@@ -162,9 +163,6 @@ def main():
     # Load datasets
     ###############
     raw_datasets = get_datasets(data_args, splits=data_args.dataset_splits)
-    logger.info(
-        f"Training on the following datasets and their proportions: {[split + ' : ' + str(dset.num_rows) for split, dset in raw_datasets.items()]}"
-    )
 
     ################
     # Load tokenizer
@@ -190,16 +188,19 @@ def main():
         fn_kwargs={ "tokenizer": tokenizer }
     )
 
-    eval_dataset = raw_eval_dataset.map(
-        train_tokenize_function,
-        batched=True,
-        batch_size=3000,
-        num_proc=data_args.preprocessing_num_workers,
-        remove_columns=raw_eval_dataset.column_names,
-        load_from_cache_file=True, # not args.overwrite_cache
-        desc="Running Encoding",
-        fn_kwargs={ "tokenizer": tokenizer }
-    )
+    if raw_eval_dataset != None:
+        eval_dataset = raw_eval_dataset.map(
+            train_tokenize_function,
+            batched=True,
+            batch_size=3000,
+            num_proc=data_args.preprocessing_num_workers,
+            remove_columns=raw_eval_dataset.column_names,
+            load_from_cache_file=True, # not args.overwrite_cache
+            desc="Running Encoding",
+            fn_kwargs={ "tokenizer": tokenizer }
+        )
+    else:
+        eval_dataset = None
 
     # with training_args.main_process_first(desc="Log a few random samples from the processed training set"):
     #     for index in random.sample(range(len(raw_train_datasets["train"])), 3):
@@ -230,7 +231,7 @@ def main():
 
     peft_config=get_peft_config(model_args)
     if peft_config is not None:
-        model = get_peft_model(model, peft_config)
+        model.add_adapter(peft_config)
 
     logger.info("*** Model loaded! ***")
 
@@ -297,4 +298,4 @@ def main():
 
 
 if __name__ == "__main__":
-    train()
+    main()
