@@ -1,0 +1,1 @@
+ACCELERATE_LOG_LEVEL=info accelerate launch --config_file recipes/accelerate_configs/deepspeed_zero3.yaml scripts/run_train.py /home/xysun/workspace/alignment-handbook/recipes/esp-deepspeed-7b/pretrain/config_full_8k.yaml

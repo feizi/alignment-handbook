@@ -189,7 +189,7 @@ class DataArguments:
     """
 
     chat_template: Optional[str] = field(default=None, metadata={"help": "The chat template to use."})
-    dataset_mixer: Optional[Dict[str, float]] = field(
+    dataset_mixer: Optional[Dict[str, str]] = field(
         default=None,
         metadata={"help": ("Datasets and their proportions to be used for training ift/rl.")},
     )
@@ -222,6 +222,8 @@ class DataArguments:
     truncation_side: Optional[str] = field(
         default=None, metadata={"help": "Truncation side to use for the tokenizer."}
     )
+    cache_dir: Optional[str] = field(default=None, metadata={"help": "The cache dir of datasets."})
+    data_format: Optional[str] = field(default=None, metadata={"help": "The format of dataset, currently support json,csv,text"})
 
 
 @dataclass

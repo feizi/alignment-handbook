@@ -89,6 +89,7 @@ def get_datasets(
     data_config: DataArguments | dict,
     splits: List[str] = ["train", "test"],
     shuffle: bool = True,
+    data_format = None,
 ) -> DatasetDict:
     """
     Loads one or more datasets with varying training set proportions.
@@ -112,6 +113,7 @@ def get_datasets(
         #     - 'dataset2': 0.3
         #     - 'dataset3': 0.2
         dataset_mixer = data_config.dataset_mixer
+        data_format = data_config.data_format
     elif type(data_config) is dict:
         # Structure of the input is:
         #     dataset_mixer = {
@@ -120,10 +122,24 @@ def get_datasets(
         #             "dataset1": 0.2,
         #         }
         dataset_mixer = data_config
+        data_format = data_format
     else:
         raise ValueError(f"Data config {data_config} not recognized.")
+    
+    if data_format == None:
+        raw_datasets = mix_datasets(dataset_mixer, splits=splits, shuffle=shuffle)
+    else:
+        raw_datasets = load_local_datasets(dataset_mixer, data_format, shuffle=shuffle)
+    return raw_datasets
 
-    raw_datasets = mix_datasets(dataset_mixer, splits=splits, shuffle=shuffle)
+def load_local_datasets(dataset_mixer: dict, data_format: str, shuffle=True) -> DatasetDict:
+    """
+    Loads json files
+    """
+    raw_datasets = {}
+    raw_datasets["train"] = load_dataset(data_format, data_files=dataset_mixer["train"])['train']
+    raw_datasets["test"] = load_dataset(data_format, data_files=dataset_mixer["test"])['train']
+
     return raw_datasets
 
 

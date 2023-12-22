@@ -55,7 +55,7 @@ def get_quantization_config(model_args) -> BitsAndBytesConfig | None:
     return quantization_config
 
 
-def get_tokenizer(model_args: ModelArguments, data_args: DataArguments) -> PreTrainedTokenizer:
+def get_tokenizer(model_args: ModelArguments, data_args: DataArguments, max_seq_length: int = -1) -> PreTrainedTokenizer:
     """Get the tokenizer for the model."""
     tokenizer = AutoTokenizer.from_pretrained(
         model_args.model_name_or_path,
@@ -68,8 +68,11 @@ def get_tokenizer(model_args: ModelArguments, data_args: DataArguments) -> PreTr
         tokenizer.truncation_side = data_args.truncation_side
 
     # Set reasonable default for models without max length
-    if tokenizer.model_max_length > 100_000:
-        tokenizer.model_max_length = 2048
+    if max_seq_length == -1:
+        if tokenizer.model_max_length > 100_000:
+            tokenizer.model_max_length = 2048
+    else:
+        tokenizer.model_max_length = max_seq_length
 
     if data_args.chat_template is not None:
         tokenizer.chat_template = data_args.chat_template
